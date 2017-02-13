@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>弹力球</title>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+        }
+        #div1{
+            width: 100px;
+            height: 100px;
+            background: red;
+            position: absolute;
+            top: 20px;
+            left: 30px;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+<div id="div1"></div>
+<script src="event-4.1.js"></script>
+<script>
+    var div1=document.getElementById("div1");
+    on(div1,"mousedown",down);
+    function down(e){
+        var that=this;
+        window.clearInterval(that.timerFly);
+        window.clearInterval(that.timerDrop);
+        this.l= e.pageX-this.offsetLeft;
+        this.t= e.pageY-this.offsetTop;
+        this.Move=function(e){
+            move.call(that,e);
+        };
+        this.Up=function(e){
+            up.call(that,e)
+        };
+        on(document,"mousemove",this.Move);
+        on(document,"mouseup",this.Up);
+    }
+    function move(e){
+        var that=this;
+        var l= e.pageX-this.l;
+        var t= e.pageY-this.t;
+        var minL = 0, minT = 0;
+        var maxL = (document.documentElement.clientWidth || document.body.clientWidth) - this.offsetWidth;
+        var maxT = (document.documentElement.clientHeight || document.body.clientHeight) - this.offsetHeight;
+        l = l < minL ? minL : l > maxL ? maxL : l;
+        t = t < minT ? minT : t > maxT ? maxT : t;
+        that.style.left=l+"px";
+        that.style.top=t+"px";
+        if(!this.prevPosi){
+            this.prevPosi=this.offsetLeft;
+        }
+        else{
+            this.speedFly=this.offsetLeft-this.prevPosi;
+            this.prevPosi=this.offsetLeft;
+        }
+    }
+    function up(e){
+        var that=this;
+        off(document,"mousemove",that.Move);
+        off(document,"mouseup",that.Up);
+        fly.call(this);
+        drop.call(this);
+    }
+    function fly(){
+        var that=this;
+        that.timerFly=window.setInterval(function(){
+            var curLeft=that.offsetLeft;
+            that.speedFly*=0.98;
+            if(Math.abs(that.speedFly)<0.5){
+                window.clearInterval(that.timerFly);
+                return ;
+            }
+            var minLeft= 0,maxLeft=(document.documentElement.clientWidth||document.body.clientWidth)-that.offsetWidth;
+            curLeft+=that.speedFly;
+            if(curLeft<minLeft){
+                that.style.left=minLeft+"px";
+                that.speedFly*=-1;
+            }
+            else if(curLeft>maxLeft){
+                that.style.left=maxLeft+"px";
+                that.speedFly*=-1;
+            }
+            else{
+                that.style.left=curLeft+"px";
+            }
+        },10)
+    }
+    function drop(){
+        var that=this;
+        that.timerDrop=window.setInterval(function(){
+            that.dropSpeed= !that.dropSpeed?9.8:that.dropSpeed+9.8;
+            var curTop=that.offsetTop;
+            that.dropSpeed*=0.98;
+            curTop+=that.dropSpeed;
+            if(that.dropFlag==2){
+                window.clearInterval(that.timerDrop);
+            }
+            var minTop= 0,maxTop=(document.documentElement.clientHeight||document.body.clientHeight)-that.offsetHeight;
+            if(curTop<minTop){
+                that.style.top=minTop;
+                that.dropSpeed*=-1;
+            }
+            else if(curTop>maxTop){
+                that.style.top=maxTop;
+                that.dropSpeed*=-1;
+                that.dropFlag++;
+            }
+            else{
+                that.style.top=curTop+"px";
+                that.dropFlag=0;
+            }
+        },10)
+    }
+</script>
+</body>
+</html>
